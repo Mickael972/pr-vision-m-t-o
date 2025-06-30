@@ -1,6 +1,11 @@
 import * as Location from 'expo-location';
 import { useEffect, useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+
+// Importer nos composants
+import CurrentWeather from './components/CurrentWeather';
+import ForecastList from './components/ForecastList';
+import Loader from './components/Loader';
 
 export default function App() {
   const [weather, setWeather] = useState<any>(null);
@@ -34,66 +39,39 @@ export default function App() {
       setWeather(data);
       setLoading(false);
     } catch (err) {
-      setError('Erreur');
+      setError('Erreur de connexion');
       setLoading(false);
     }
   };
 
+  // Afficher le loader pendant le chargement
   if (loading) {
-    return (
-      <View style={styles.center}>
-        <Text>Chargement...</Text>
-      </View>
-    );
+    return <Loader />;
   }
 
+  // Afficher l'erreur
   if (error) {
     return (
-      <View style={styles.center}>
-        <Text>{error}</Text>
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>{error}</Text>
       </View>
     );
   }
 
+  // Pas de données
   if (!weather) {
     return (
-      <View style={styles.center}>
-        <Text>Pas de données</Text>
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>Aucune donnée disponible</Text>
       </View>
     );
   }
 
-  const current = weather.list[0];
-
+  // Afficher l'app météo
   return (
     <View style={styles.container}>
-      {/* Météo actuelle */}
-      <View style={styles.current}>
-        <Text style={styles.city}>{weather.city.name}</Text>
-        <Text style={styles.temp}>{Math.round(current.main.temp)}°C</Text>
-        <Text>{current.weather[0].description}</Text>
-        <Image 
-          source={{ uri: `https://openweathermap.org/img/wn/${current.weather[0].icon}@2x.png` }}
-          style={styles.icon}
-        />
-      </View>
-
-      {/* Prévisions */}
-      <Text style={styles.title}>Prévisions 5 jours</Text>
-      
-      <ScrollView style={styles.list}>
-        {weather.list.map((item: any, index: any) => (
-          <View key={index} style={styles.item}>
-            <Text style={styles.date}>{item.dt_txt}</Text>
-            <Image 
-              source={{ uri: `https://openweathermap.org/img/wn/${item.weather[0].icon}.png` }}
-              style={styles.smallIcon}
-            />
-            <Text>{Math.round(item.main.temp)}°C</Text>
-            <Text>{item.weather[0].description}</Text>
-          </View>
-        ))}
-      </ScrollView>
+      <CurrentWeather weather={weather} />
+      <ForecastList weather={weather} />
     </View>
   );
 }
@@ -102,57 +80,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#f5f5f5',
   },
-  center: {
+  errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#f5f5f5',
   },
-  current: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginBottom: 20,
-    marginTop: 40,
-  },
-  city: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  temp: {
-    fontSize: 36,
-    color: 'red',
-    fontWeight: 'bold',
-  },
-  icon: {
-    width: 80,
-    height: 80,
-  },
-  title: {
+  errorText: {
     fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  list: {
-    flex: 1,
-  },
-  item: {
-    backgroundColor: 'white',
-    padding: 15,
-    marginBottom: 5,
-    borderRadius: 5,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  date: {
-    flex: 1,
-    fontSize: 12,
-  },
-  smallIcon: {
-    width: 40,
-    height: 40,
-    marginHorizontal: 10,
+    color: '#FF6B6B',
+    textAlign: 'center',
   },
 });
