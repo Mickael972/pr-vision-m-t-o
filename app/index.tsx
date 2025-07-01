@@ -2,15 +2,17 @@ import * as Location from 'expo-location';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-// Importer nos composants
+// Importer composants
 import CurrentWeather from './components/CurrentWeather';
-import ForecastList from './components/ForecastList';
+import DayDetail from './components/DayDetail';
+import DaysList from './components/DaysList';
 import Loader from './components/Loader';
 
 export default function App() {
   const [weather, setWeather] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedDay, setSelectedDay] = useState<string | null>(null);
 
   useEffect(() => {
     getWeather();
@@ -44,6 +46,15 @@ export default function App() {
     }
   };
 
+  // Fonctions pour navigation
+  const selectDay = (day: string) => {
+    setSelectedDay(day);
+  };
+
+  const goBack = () => {
+    setSelectedDay(null);
+  };
+
   // Afficher le loader pendant le chargement
   if (loading) {
     return <Loader />;
@@ -71,7 +82,19 @@ export default function App() {
   return (
     <View style={styles.container}>
       <CurrentWeather weather={weather} />
-      <ForecastList weather={weather} />
+      
+      {selectedDay ? (
+        <DayDetail 
+          weather={weather} 
+          selectedDay={selectedDay} 
+          onGoBack={goBack}
+        />
+      ) : (
+        <DaysList 
+          weather={weather} 
+          onDaySelect={selectDay}
+        />
+      )}
     </View>
   );
 }
